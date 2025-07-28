@@ -38,12 +38,9 @@ const api = {
       }
     });
   },
-
-
-
-
+  
   async: {
-    baseUrl: import.meta.env.VITE_SERVER_URL,
+    baseUrl: import.meta.env.VITE_API_URL,
     get: async function (url) {
       // console.log(this.baseUrl + url);
 
