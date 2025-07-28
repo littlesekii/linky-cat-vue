@@ -1,11 +1,28 @@
 <script setup>
+import api from "@/api/api";
 import LoginFormComponent from "@/components/AuthFormComponent/LoginFormComponent.vue";
+
+async function login(userCredentials) {
+
+  const body = {
+    "username": userCredentials.username,
+    "password": userCredentials.password
+  };
+
+  console.log(body)
+
+  const res = await api.async.post("/api/auth/login", JSON.stringify(body));
+
+  console.log(res);
+
+}
+
 </script>
 
 <template>
   <main class="main-container flex">
     <div class="left-container flex f-centered">
-      <LoginFormComponent/>
+      <LoginFormComponent @login="login"/>
     </div>
     <aside class="right-container">
       

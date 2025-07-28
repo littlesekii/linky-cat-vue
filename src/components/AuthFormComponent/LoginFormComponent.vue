@@ -1,5 +1,13 @@
 <script setup>
+import { reactive } from "vue";
 import { RouterLink } from "vue-router";
+
+const emit = defineEmits(["login"]);
+
+const userCredentials = reactive({
+  username: "",
+  password: ""
+});
 
 </script>
 
@@ -10,13 +18,14 @@ import { RouterLink } from "vue-router";
 			<p class="text">Log in to your account</p>
 		</header>
 
-		<form class="form flex f-column">
-			<input class="input" type="email" placeholder="Email">
-      		<input class="input" type="password" placeholder="Password">
+		<form class="form flex f-column" @submit.prevent="emit('login', userCredentials)">
+			<input class="input" type="text" placeholder="Username" v-model="userCredentials.username">
+      		<input class="input" type="password" placeholder="Password" v-model="userCredentials.password">
 			<button class="button b-inctive">Continue</button>
 			<p class="text">Don't have a account? <RouterLink class="link" to="/register">Sign up</RouterLink></p>
 		</form>
 
+    {{ userCredentials }}
 	</section>
 </template>
 
