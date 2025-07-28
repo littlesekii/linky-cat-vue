@@ -1,4 +1,5 @@
 <script setup>
+import { RouterLink } from "vue-router";
 
 </script>
 
@@ -11,9 +12,9 @@
 
 		<form class="form flex f-column">
 			<input class="input" type="email" placeholder="Email">
-      <input class="input" type="password" placeholder="Password">
+      		<input class="input" type="password" placeholder="Password">
 			<button class="button b-inctive">Continue</button>
-			<p class="text">Don't have a account? <a class="link" href="/register">Sign up</a></p>
+			<p class="text">Don't have a account? <RouterLink class="link" to="/register">Sign up</RouterLink></p>
 		</form>
 
 	</section>
