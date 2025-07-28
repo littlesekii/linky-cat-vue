@@ -1,10 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Funnel+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 :root {
-  
+
+  --color-black: #252628;
+  --color-black-light: #3b3d40;
+  --color-gray-dark: #676b6f;
+  --color-gray: #a7abae;
+  --color-gray-light: #caccce;
+  --color-gray-lighter: hsl(200, 6%, 93%);
+  --color-white: #fcfcfd;
+  --color-brand: #673ab7;
 }
 
 :root {
-  
+  --text-color: var(--color-black);
+  --text-color-light: var(--color-gray-dark);
+  --button-color: var(--color-brand);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,8 +36,12 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  outline-offset: 3px;
+  outline-color: var(--color-black-light);
+  
 }
 
 body {
-  
+  color: var(--text-color);
 }
