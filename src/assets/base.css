@@ -9,12 +9,18 @@
   --color-gray-lighter: hsl(200, 6%, 93%);
   --color-white: #fcfcfd;
   --color-brand: #673ab7;
+
+	--color-green: #00d369;
+  --color-red: #e44949;
 }
 
 :root {
   --text-color: var(--color-black);
-  --text-color-light: var(--color-gray-dark);
+  --text-light-color: var(--color-gray-dark);
   --button-color: var(--color-brand);
+
+	--success-color: var(--color-green);
+	--error-color: var(--color-red);
 }
 
 @media (prefers-color-scheme: dark) {
