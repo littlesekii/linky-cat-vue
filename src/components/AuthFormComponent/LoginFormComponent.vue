@@ -1,7 +1,10 @@
 <!-- eslint-disable indent -->
 <script setup>
-import { computed, reactive } from "vue";
+import api from "@/api/api";
+import { computed, reactive, ref } from "vue";
 import { RouterLink } from "vue-router";
+
+import LOADING_ICON from "@/assets/icons/loading.svg";
 
 const emit = defineEmits(["login"]);
 
@@ -13,9 +16,9 @@ const labelMovedPlaceholderPasswordClass = computed(() => {
   return userCredentials.password.length > 0 || inputFocused.password ? "label-placeholder-moved" : "";
 });
 
-const inputError = reactive({
-  username: false,
-  password: false
+const inputErrorMsg = reactive({
+	username: "",
+  password: ""
 });
 
 const inputFocused = reactive({
@@ -28,30 +31,83 @@ const userCredentials = reactive({
   password: ""
 });
 
-function login() {
-	
+const isLoading = ref(false);
+
+async function login() {
+
 	if (!validateFields())
 		return;
 	
-	emit("login", userCredentials);
+  const body = {
+    "username": userCredentials.username,
+    "password": userCredentials.password
+  };
+
+  try {
+		isLoading.value = true;
+
+    const res = await api.async.post("/api/auth/login", JSON.stringify(body));
+		const data = await res.json();
+		isLoading.value = false;
+
+    if (!res.ok) {
+			if (data.errorCode === "AUTH001") {
+				showNotExistingUsernameError("This username is not registered");
+			}
+
+			if (data.errorCode === "AUTH002") {
+				showIncorrectPasswordError("Incorrect password");
+			}
+			return;
+    }
+
+		emit("login", "success", data);
+
+  } catch (e) {
+		isLoading.value = false;
+
+		alert(e.message);
+		emit("login", "error", e.message);
+  }
+
+	
+}
+
+function showNotExistingUsernameError(msg) {
+	removeFieldError("password");
+	document.querySelector("#ig-username").classList.add("input-error");
+	document.querySelector("#ig-username").classList.add("shake-animation");	
+
+	inputErrorMsg.username = msg;
+}
+
+function showIncorrectPasswordError(msg) {
+	removeFieldError("username");
+	document.querySelector("#ig-password").classList.add("input-error");
+	document.querySelector("#ig-password").classList.add("shake-animation");	
+
+	inputErrorMsg.password = msg;
 }
 
 function validateFields() {
 
-	removeFieldError("username");
-	removeFieldError("password");
+	const errorMsg = "Please fill out this field";
 
 	if (userCredentials.username.trim() === "") {
+		removeFieldError("password");
 		document.querySelector("#ig-username").classList.add("input-error");
 		document.querySelector("#ig-username").classList.add("shake-animation");	
-		inputError.username = true;
+		inputErrorMsg.username = errorMsg;
+
 		return false;
 	}
 	
 	if (userCredentials.password.trim() === "") {
+		removeFieldError("username");
 		document.querySelector("#ig-password").classList.add("input-error");
 		document.querySelector("#ig-password").classList.add("shake-animation");
-		inputError.password = true;
+		inputErrorMsg.password = errorMsg;
+
 		return false;
 	}
 
@@ -63,12 +119,12 @@ function removeFieldError(field) {
 	if (field == "username") {
 		document.querySelector("#ig-username").classList.remove("input-error");
 		document.querySelector("#ig-username").classList.remove("shake-animation");
-		inputError.username = false;
+		inputErrorMsg.username = "";
 	}
 	if (field == "password") {
 		document.querySelector("#ig-password").classList.remove("input-error");
 		document.querySelector("#ig-password").classList.remove("shake-animation");
-		inputError.password = false;
+		inputErrorMsg.password = "";
 	}
 }
 
@@ -84,10 +140,9 @@ function removeFieldError(field) {
 		<form class="form flex f-column" @submit.prevent="login">
 			<p 
 				class="text input-error-text" 
-				id="input-username-error-text"
-				v-if="inputError.username"
+				v-if=" inputErrorMsg.username !== '' "
 			>
-				Please fill out this field
+				{{ inputErrorMsg.username }}
 			</p>
 			<div class="input-group flex f-column" id="ig-username">
 				<label 
@@ -102,7 +157,7 @@ function removeFieldError(field) {
 					id="input-username" 
 					type="text" 
 					placeholder=" " 
-					@keydown="removeFieldError('username')"
+					@keydown="e => {if (e.key !== 'Enter') { removeFieldError('username'); }}"
 					@focusin="inputFocused.username = true" 
 					@focusout="inputFocused.username = false" 
 					v-model="userCredentials.username"
@@ -111,10 +166,10 @@ function removeFieldError(field) {
 			</div>
 			<p 
 				class="text input-error-text" 
-				id="input-password-error-text"
-				v-if="inputError.password"
+				ref="input-password-error-msg"
+				v-if=" inputErrorMsg.password !== '' "
 			>
-				Please fill out this field
+				{{ inputErrorMsg.password }}
 			</p>
 			<div class="input-group flex f-column" id="ig-password">				
 				<label 
@@ -129,7 +184,7 @@ function removeFieldError(field) {
 					id="input-password" 
 					type="password" 
 					placeholder=" " 
-					@keydown="removeFieldError('password')"
+					@keydown="e => {if (e.key !== 'Enter') { removeFieldError('password'); }}"
 					@focusin="inputFocused.password = true" 
 					@focusout="inputFocused.password = false" 
 					v-model="userCredentials.password"
@@ -137,8 +192,8 @@ function removeFieldError(field) {
 				
 			</div>
 			<div class="input-group flex f-column">
-				
-				<button class="button">Login</button>
+				<img class="loading-icon" :src="LOADING_ICON" alt="Loading circle" v-if="isLoading">
+				<button class="button" v-if="!isLoading">Login</button>
 			</div>
 			<p class="text">Don't have a account? <RouterLink class="link" to="/register">Sign up</RouterLink></p>
 		</form>
@@ -243,6 +298,9 @@ function removeFieldError(field) {
 				color: var(--color-black-light);
 			}
 
+			.loading-icon {
+				height: 48px;
+			}
 		}
 
 		.input-error {

@@ -1,26 +1,11 @@
 <script setup>
-import api from "@/api/api";
 import LoginFormComponent from "@/components/AuthFormComponent/LoginFormComponent.vue";
+import router from "@/router";
 
-async function login(userCredentials) {
-
-  const body = {
-    "username": userCredentials.username,
-    "password": userCredentials.password
-  };
-
-  const res = await api.async.post("/api/auth/login", JSON.stringify(body));
-
-  if (res.ok) {
-    console.log(res);
-    console.log(res.text);
-  } else {
-    const data = await res.json();
-    alert(`${data.error}:\n${data.message}.`);
+function login (state, message) {
+  if (state == "success") {
+    router.replace("/");
   }
-
-
-
 }
 
 </script>
@@ -57,8 +42,5 @@ async function login(userCredentials) {
     }
   }
 }
-
-
-
 
 </style>
