@@ -2,10 +2,9 @@
 import LoginFormComponent from "@/components/AuthFormComponent/LoginFormComponent.vue";
 import router from "@/router";
 
-function login (state, message) {
-  if (state == "success") {
-    router.replace("/");
-  }
+function login(data) {
+  console.log(data);
+  router.replace("/");
 }
 
 </script>

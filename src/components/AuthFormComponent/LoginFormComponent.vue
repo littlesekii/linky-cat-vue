@@ -16,6 +16,8 @@ const labelMovedPlaceholderPasswordClass = computed(() => {
   return userCredentials.password.length > 0 || inputFocused.password ? "label-placeholder-moved" : "";
 });
 
+const internalErrorMsg = ref("");
+
 const inputErrorMsg = reactive({
 	username: "",
   password: ""
@@ -45,6 +47,7 @@ async function login() {
 
   try {
 		isLoading.value = true;
+		removeInternalError();
 
     const res = await api.async.post("/api/auth/login", JSON.stringify(body));
 		const data = await res.json();
@@ -53,24 +56,26 @@ async function login() {
     if (!res.ok) {
 			if (data.errorCode === "AUTH001") {
 				showNotExistingUsernameError("This username is not registered");
+				return;
 			}
 
 			if (data.errorCode === "AUTH002") {
+				userCredentials.password = "";
 				showIncorrectPasswordError("Incorrect password");
+				return;
 			}
+			
+			showInternalError("A unexpected error occurred");
 			return;
     }
 
-		emit("login", "success", data);
+		emit("login", data);
 
-  } catch (e) {
+  } catch {
 		isLoading.value = false;
-
-		alert(e.message);
-		emit("login", "error", e.message);
+		showInternalError("A internal error occurred, please try again later");
   }
 
-	
 }
 
 function showNotExistingUsernameError(msg) {
@@ -87,6 +92,10 @@ function showIncorrectPasswordError(msg) {
 	document.querySelector("#ig-password").classList.add("shake-animation");	
 
 	inputErrorMsg.password = msg;
+}
+
+function showInternalError(msg) {
+	internalErrorMsg.value = msg;
 }
 
 function validateFields() {
@@ -128,6 +137,10 @@ function removeFieldError(field) {
 	}
 }
 
+function removeInternalError() {
+	internalErrorMsg.value = "";
+}
+
 </script>
 
 <template>
@@ -137,6 +150,13 @@ function removeFieldError(field) {
 			<p class="text">Log in to your account</p>
 		</header>
 
+		<p 
+			class="text internal-error-text" 
+			ref="input-password-error-msg"
+			v-if=" internalErrorMsg !== '' "
+		>
+			{{ internalErrorMsg }}
+		</p>
 		<form class="form flex f-column" @submit.prevent="login">
 			<p 
 				class="text input-error-text" 
@@ -230,6 +250,15 @@ function removeFieldError(field) {
 			font-size: 34pt;
 			font-weight: bold;
 		}
+	}
+
+	.internal-error-text {
+		padding-bottom: 4px;
+		padding-left: 2px;
+		text-align: center;
+		font-size: 11pt;
+		font-weight: 500;
+		color:var(--error-color);
 	}
 
 	.form {
