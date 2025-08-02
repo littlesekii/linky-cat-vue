@@ -1,0 +1,189 @@
+
+<script setup>
+import api from "@/api/api";
+import AuthInputComponent from "@/components/AuthFormComponent/AuthInputComponent.vue";
+import utils from "@/utils/utils";
+import { ref, useTemplateRef } from "vue";
+
+const email = ref("");
+const isLoading = ref(false);
+const canContinue = ref(false);
+const internalErrorMsg = ref("");
+
+const inputRef = useTemplateRef("input");
+const emit = defineEmits(["continue"]);
+
+const debouncedValidate = utils.debounce(validate, 700);
+
+function showInternalError(msg) {
+  internalErrorMsg.value = msg;
+}
+
+function removeInternalError() {
+  internalErrorMsg.value = "";
+}
+
+async function validate(email) {
+	canContinue.value = false;
+
+	if (!inputRef.value.validate())
+		return false;
+
+	const charRange = "A-Za-z\\u00C0-\\u017F\\u0400-\\u04FF\\u4E00-\\u9FFF\\u3040-\\u30FF"; // Latin-1 \ Cyrillic \ Chinese \ Japanese
+  if (!email.match(`^[0-9${charRange}!#$%'*=?^_\`{}|~.\\/+-]+@[0-9${charRange}.-]+\\.[${charRange}]{2,}(?:\\.[${charRange}]{2,})?$`)) {
+    inputRef.value.showError("Invalid email format");
+    return false;
+  }
+	
+	if (email.includes("..")) {
+		inputRef.value.showError("Invalid email format");
+    return false;
+	}
+	
+	const local = email.split("@")[0];
+	if (local.startsWith(".") || local.endsWith(".")) {
+		inputRef.value.showError("Invalid email format");
+    return false;
+	}
+
+	const domain = email.split("@")[1];
+	if (domain.startsWith(".") || domain.startsWith("-")) {
+		inputRef.value.showError("Invalid email format");
+    return false;
+	}
+
+  // Server validation
+  try {
+    isLoading.value = true;
+    removeInternalError();
+
+		const body = {
+			"email": email,
+		};
+
+    const res = await api.async.post("/api/auth/register/check-email", JSON.stringify(body));
+    isLoading.value = false;
+		
+    if (!res.ok) {
+      const data = await res.json();
+      if (data.errorCode === "AUTH003") {
+        inputRef.value.showError("This email is already registered");
+        return false;
+      }
+			
+      showInternalError("A unexpected error occurred");
+      return false;
+    }
+  } catch {
+    isLoading.value = false;
+    showInternalError("A internal error occurred, please try again later");
+    return false;
+  }
+
+	canContinue.value = true;
+	return true;
+}
+
+async function continueRegister() {
+		
+  if (!canContinue.value)
+		return;
+
+	if (!await validate(email.value))
+		return;
+
+	emit("continue", { email: email.value });
+	
+}
+
+</script>
+
+<template>
+  <section class="register-container flex f-column">
+		<header class="header flex f-column">
+			<h1 class="title">Join Linky Cat</h1>
+			<p class="text">Create your account for free!</p>
+		</header>
+
+		<p 
+			class="text internal-error-text" 
+			v-if=" internalErrorMsg !== '' "
+		>
+			{{ internalErrorMsg }}
+		</p>
+    <form class="form flex f-column" @submit.prevent="continueRegister">
+      <AuthInputComponent 
+        type="text" 
+        v-model="email" 
+        placeholder="Email" 
+        ref="input" 
+
+        @input="debouncedValidate(email)"
+      />
+      <AuthInputComponent
+        type="button" 
+        :disabled="!canContinue"
+        button-text="Continue" 
+      />
+      <p class="text">
+        Already have an account? <RouterLink class="link" to="/login">Log in</RouterLink>
+      </p>
+    </form>
+  </section>
+</template>
+
+<style scoped>
+.text {
+	color: var(--text-light-color);
+	font-weight: lighter;
+}
+
+.register-container {
+	width: 90%;
+
+	.header {
+		margin-bottom: 30px;
+		text-align: center;
+
+		.title {
+			margin-bottom: 15px;
+			font-size: 34pt;
+			font-weight: bold;
+		}
+	}
+
+	.internal-error-text {
+		padding-bottom: 4px;
+		padding-left: 2px;
+		text-align: center;
+		font-size: 11pt;
+		font-weight: 500;
+		color:var(--error-color);
+	}
+
+	.form {
+		margin: auto;
+		width: 100%;
+		max-width: 500px;
+
+		text-align: center;
+
+		.text {
+			font-size: 11pt;
+			.link {
+				color: inherit;
+			}
+		}
+
+		.input-error-text {
+			padding-bottom: 2px;
+			padding-left: 2px;
+			text-align: left;
+			font-size: 11pt;
+			font-weight: 500;
+			color:var(--error-color);
+		}
+	}
+}
+
+</style>
