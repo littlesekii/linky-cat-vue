@@ -4,20 +4,27 @@ import { computed, ref } from "vue";
 const props = defineProps([
   "type", 
   "placeholder",
+  "phFixed",
   "modelValue",
-  "buttonText"
+  "buttonText",
+  "disabled"
 ]);
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["update:modelValue", "input"]);
 
 const hasFocus = ref(false);
 const inputErrorMsg = ref("");
 
+const placeholderFixed = computed(() => {
+  return props.phFixed ? "placeholder-fixed-input" : "";
+});
+
 const placeholderMoved = computed(() => {
-  return props.modelValue.length > 0 || hasFocus.value ? "placeholder-moved" : "";
+  return !props.phFixed && (props.modelValue.length > 0 || hasFocus.value) ? "placeholder-moved" : "";
 });
 
 function updateModelValue(event) {
   emit("update:modelValue", event.target.value);
+  emit("input");
 }
 
 function validate() {
@@ -63,23 +70,23 @@ defineExpose({
     <div class="input-group flex f-column" id="input-group">      
       <label 
         class="placeholder" 
-        :class="placeholderMoved" 
+        :class="placeholderMoved"
         for="input"
       >
         {{ props.placeholder }}
       </label>
       <input 
         class="input" 
+        :class="placeholderFixed"
         id="input" 
         placeholder=" " 
         :type="props.type"
-        :value="props.modelValue"
+        :value="props.modelValue"       
 
         @focusin="hasFocus = true" 
         @focusout="hasFocus = false" 
         @keydown="e => {if (e.key !== 'Enter') { removeError(); }}"
-        @input="updateModelValue"
-        
+        @input="updateModelValue"        
       >
     </div>
   </div>
@@ -87,7 +94,7 @@ defineExpose({
   <!-- Button -->
   <div class="auth-input-component" v-if="type === 'button'">
     <div class="input-group flex f-column">      
-      <button class="button">{{ props.buttonText }}</button>
+      <button class="button" :disabled="props.disabled">{{ props.buttonText }}</button>
     </div>
   </div>
 </template>
@@ -117,7 +124,7 @@ defineExpose({
     font-size: 11pt;
     position: absolute;
     padding-left: 15px;
-    padding-top: 13px;
+    padding-top: 14px;
 
     cursor: text;
     color: var(--color-gray-dark);
@@ -144,6 +151,11 @@ defineExpose({
     color: var(--color-black);
   }
 
+  .placeholder-fixed-input {
+    padding: 14px 15px;	
+    padding-left: 77px;
+  }
+
   .button {
     border: none;
     border-radius: 25px;
@@ -154,6 +166,13 @@ defineExpose({
     font-weight: bold;
 
     cursor: pointer;
+  }
+
+  .button:disabled {
+    background-color: var(--color-gray-light);
+		color: var(--color-black-light);
+
+    cursor: default;
   }
 }
 
