@@ -2,10 +2,10 @@ const utils = {
   debounce: function (func, delay) {
     let timeoutId;
     
-    return function() {
+    return function(...args) {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
-        func.apply(this);
+        func.apply(this, args);
       }, delay);
     };
   }
