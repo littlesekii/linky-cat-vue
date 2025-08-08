@@ -80,7 +80,6 @@ defineExpose({
       <input 
         class="input" 
         :class="placeholderFixed"
-        id="input" 
         placeholder=" " 
         :type="props.type"
         :value="props.modelValue"       
