@@ -15,8 +15,12 @@ const emit = defineEmits(["continue"]);
 
 const debouncedValidate = utils.debounce(validate, 700);
 
+function onInput(event) {
+	debouncedValidate();
+}
+
 async function validate() {
-canContinue.value = false;
+	canContinue.value = false;
 
   // Password validation
 	if (!inputPasswordRef.value.validate())
@@ -95,7 +99,7 @@ async function continueRegister() {
         placeholder="Password" 
         ref="input-pw" 
 
-        @input="debouncedValidate"
+        @input="onInput"
       />
       <AuthInputComponent 
         id="password-confirmation"
@@ -104,7 +108,7 @@ async function continueRegister() {
         placeholder="Confirm Password" 
         ref="input-pw-confirmation" 
 
-        @input="debouncedValidate"
+        @input="onInput"
       />
       <AuthInputComponent
         type="button" 
