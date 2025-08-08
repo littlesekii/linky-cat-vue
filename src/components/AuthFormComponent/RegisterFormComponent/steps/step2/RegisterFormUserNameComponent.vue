@@ -29,7 +29,30 @@ async function validate(username) {
 	if (!inputRef.value.validate())
 		return false;
 
-	
+	if (username.length > 32) {
+		inputRef.value.showError("Username length can't be over 32 characters");
+    return false;	
+	}
+
+  if (username.match("[^A-Za-z0-9._]")) {
+    inputRef.value.showError("Username can only contain letters (A-Z, a-z), numbers, underscores, and periods");
+    return false;
+  }
+
+	if (!username.match("[A-Za-z0-9]")) {
+    inputRef.value.showError("Username must contain at least one letter (A-Z, a-z) or number");
+    return false;
+  }
+
+	if (username.includes("..")) {
+    inputRef.value.showError("Username can't contain more than one period in a row");
+    return false;
+  }
+
+	if (username.startsWith(".") || username.endsWith(".")) {
+		inputRef.value.showError("Username can't start or end with a period");
+    return false;
+	}
 
   // Server validation
   try {
@@ -91,6 +114,7 @@ async function continueRegister() {
 		</p>
     <form class="form flex f-column" @submit.prevent="continueRegister">
       <AuthInputComponent 
+				id="username"
         type="text" 
         v-model="username" 
         placeholder="linky.cat/" 
