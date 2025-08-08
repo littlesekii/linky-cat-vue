@@ -113,6 +113,7 @@ async function continueRegister() {
 		</p>
     <form class="form flex f-column" @submit.prevent="continueRegister">
       <AuthInputComponent 
+				id="email"
         type="text" 
         v-model="email" 
         placeholder="Email" 
