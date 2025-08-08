@@ -19,7 +19,7 @@ const registrationSteps = [
 	"email", 
 	"username", 
 	"email-verification",
-	"password",
+	"password", 
 	"page-name"
 ];
 
@@ -30,6 +30,9 @@ function continueRegister(data) {
 	if (registrationSteps[currentStep.value] == "username") {
 		registerData.username = data.username;
 	}
+	if (registrationSteps[currentStep.value] == "password") {
+		registerData.password = data.password;
+	}
 
 	++currentStep.value;
 }
@@ -37,7 +40,7 @@ function continueRegister(data) {
 </script>
 
 <template>
-	<!-- <div class="flex f-column f-centered"> -->
+	<div class="flex f-column f-centered">
 		<RegisterFormEmailComponent 
 			v-if="registrationSteps[currentStep] == 'email'" 
 			@continue="continueRegister"
@@ -53,14 +56,16 @@ function continueRegister(data) {
 		<RegisterFormEmailVerificationComponent
 			v-if="registrationSteps[currentStep] == 'email-verification'" 
 			@continue="continueRegister"
+			
+			:email="registerData.email"
 		/>
 		<RegisterFormPageNameComponent 
 			v-if="registrationSteps[currentStep] == 'page-name'" 
 			@continue="continueRegister"
 		/>
-		<!-- <br>
+		<br>
 		{{ registerData }}
-	</div> -->
+	</div>
 
 	
 </template>
