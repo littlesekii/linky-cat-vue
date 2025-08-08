@@ -3,7 +3,7 @@
 import api from "@/api/api";
 import AuthInputComponent from "@/components/AuthFormComponent/AuthInputComponent.vue";
 import utils from "@/utils/utils";
-import { ref, useTemplateRef } from "vue";
+import { onMounted, ref, useTemplateRef } from "vue";
 
 const props = defineProps(["email"]);
 
@@ -16,6 +16,27 @@ const inputRef = useTemplateRef("input");
 const emit = defineEmits(["continue"]);
 
 const debouncedValidate = utils.debounce(validate, 700);
+
+onMounted(async () => {
+	try {
+
+		const body = {
+			"email": props.email
+		};
+
+    const res = await api.async.post("/api/email-verification/send", JSON.stringify(body));
+		
+    if (!res.ok) {
+      showInternalError("A unexpected error occurred");
+      return false;
+    }
+  } catch {
+    isLoading.value = false;
+    showInternalError("A internal error occurred, please try again later");
+    return false;
+  }
+
+});
 
 function showInternalError(msg) {
   internalErrorMsg.value = msg;
@@ -53,6 +74,9 @@ function formatInput(input) {
 function validate() {
 	canContinue.value = false;
 
+	if (!inputRef.value.validate())
+		return false;
+
 	if (!verificationCode.value.match("^[A-Z0-9]{3}-[A-Z0-9]{3}$")) {
 		inputRef.value.showError("Invalid verification code");
 		return false;
@@ -69,7 +93,7 @@ async function verifyEmail() {
 
 		const body = {
 			"email": props.email,
-			"verificationCode": verificationCode.value
+			"verificationCode": verificationCode.value.replace("-", "")
 		};
 
     const res = await api.async.post("/api/email-verification/verify", JSON.stringify(body));
@@ -90,6 +114,8 @@ async function verifyEmail() {
     showInternalError("A internal error occurred, please try again later");
     return false;
   }
+
+	return true;
 }
 
 async function continueRegister() {
@@ -103,7 +129,7 @@ async function continueRegister() {
 	if (!await verifyEmail())
 		return;
 
-	emit("continue");
+	emit("continue", "");
 }
 
 </script>
