@@ -23,30 +23,34 @@ function removeInternalError() {
   internalErrorMsg.value = "";
 }
 
-async function validate(email) {
+function onInput(event) {
+	debouncedValidate();
+}
+
+async function validate() {
 	canContinue.value = false;
 
 	if (!inputRef.value.validate())
 		return false;
 
 	const charRange = "A-Za-z\\u00C0-\\u017F\\u0400-\\u04FF\\u4E00-\\u9FFF\\u3040-\\u30FF"; // Latin-1 \ Cyrillic \ Chinese \ Japanese
-  if (!email.match(`^[0-9${charRange}!#$%'*=?^_\`{}|~.\\/+-]+@[0-9${charRange}.-]+\\.[${charRange}]{2,}(?:\\.[${charRange}]{2,})?$`)) {
+  if (!email.value.match(`^[0-9${charRange}!#$%'*=?^_\`{}|~.\\/+-]+@[0-9${charRange}.-]+\\.[${charRange}]{2,}(?:\\.[${charRange}]{2,})?$`)) {
     inputRef.value.showError("Invalid email format");
     return false;
   }
 	
-	if (email.includes("..")) {
+	if (email.value.includes("..")) {
 		inputRef.value.showError("Invalid email format");
     return false;
 	}
 	
-	const local = email.split("@")[0];
+	const local = email.value.split("@")[0];
 	if (local.startsWith(".") || local.endsWith(".")) {
 		inputRef.value.showError("Invalid email format");
     return false;
 	}
 
-	const domain = email.split("@")[1];
+	const domain = email.value.split("@")[1];
 	if (domain.startsWith(".") || domain.startsWith("-")) {
 		inputRef.value.showError("Invalid email format");
     return false;
@@ -58,7 +62,7 @@ async function validate(email) {
     removeInternalError();
 
 		const body = {
-			"email": email,
+			"email": email.value,
 		};
 
     const res = await api.async.post("/api/auth/register/check-email", JSON.stringify(body));
@@ -119,7 +123,7 @@ async function continueRegister() {
         placeholder="Email" 
         ref="input" 
 
-        @input="debouncedValidate(email)"
+        @input="onInput"
       />
       <AuthInputComponent
         type="button" 

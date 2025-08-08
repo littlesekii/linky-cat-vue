@@ -23,33 +23,37 @@ function removeInternalError() {
   internalErrorMsg.value = "";
 }
 
-async function validate(username) {
+function onInput(event) {
+	debouncedValidate();
+}
+
+async function validate() {
 	canContinue.value = false;
 
 	if (!inputRef.value.validate())
 		return false;
 
-	if (username.length > 32) {
+	if (username.value.length > 32) {
 		inputRef.value.showError("Username length can't be over 32 characters");
     return false;	
 	}
 
-  if (username.match("[^A-Za-z0-9._]")) {
+  if (username.value.match("[^A-Za-z0-9._]")) {
     inputRef.value.showError("Username can only contain letters (A-Z, a-z), numbers, underscores, and periods");
     return false;
   }
 
-	if (!username.match("[A-Za-z0-9]")) {
+	if (!username.value.match("[A-Za-z0-9]")) {
     inputRef.value.showError("Username must contain at least one letter (A-Z, a-z) or number");
     return false;
   }
 
-	if (username.includes("..")) {
+	if (username.value.includes("..")) {
     inputRef.value.showError("Username can't contain more than one period in a row");
     return false;
   }
 
-	if (username.startsWith(".") || username.endsWith(".")) {
+	if (username.value.startsWith(".") || username.value.endsWith(".")) {
 		inputRef.value.showError("Username can't start or end with a period");
     return false;
 	}
@@ -60,7 +64,7 @@ async function validate(username) {
     removeInternalError();
 
 		const body = {
-			"username": username,
+			"username": username.value,
 		};
 
     const res = await api.async.post("/api/auth/register/check-username", JSON.stringify(body));
@@ -121,7 +125,7 @@ async function continueRegister() {
 				ph-fixed="true"
         ref="input" 
 
-        @input="debouncedValidate(username)"
+        @input="onInput"
       />
       <AuthInputComponent
         type="button" 
