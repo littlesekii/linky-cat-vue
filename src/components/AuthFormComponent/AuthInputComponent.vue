@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 
 const props = defineProps([
+  "id",
   "type", 
   "placeholder",
   "phFixed",
@@ -23,8 +24,9 @@ const placeholderMoved = computed(() => {
 });
 
 function updateModelValue(event) {
+  removeError();
   emit("update:modelValue", event.target.value);
-  emit("input");
+  emit("input", event);
 }
 
 function validate() {
@@ -40,14 +42,14 @@ function validate() {
 }
 
 function showError(msg) {
-  document.querySelector("#input-group").classList.add("input-group-error");
-  document.querySelector("#input-group").classList.add("shake-animation");	
+  document.querySelector(`#${props.id}`).classList.add("input-group-error");
+  document.querySelector(`#${props.id}`).classList.add("shake-animation");	
   inputErrorMsg.value = msg;
 }
 
 function removeError() {
-  document.querySelector("#input-group").classList.remove("input-group-error");
-  document.querySelector("#input-group").classList.remove("shake-animation");
+  document.querySelector(`#${props.id}`).classList.remove("input-group-error");
+  document.querySelector(`#${props.id}`).classList.remove("shake-animation");
   inputErrorMsg.value = "";
 }
 
@@ -67,7 +69,7 @@ defineExpose({
     >
       {{ inputErrorMsg }}
     </p>
-    <div class="input-group flex f-column" id="input-group">      
+    <div class="input-group flex f-column" :id="props.id">      
       <label 
         class="placeholder" 
         :class="placeholderMoved"
@@ -85,7 +87,6 @@ defineExpose({
 
         @focusin="hasFocus = true" 
         @focusout="hasFocus = false" 
-        @keydown="e => {if (e.key !== 'Enter') { removeError(); }}"
         @input="updateModelValue"        
       >
     </div>
