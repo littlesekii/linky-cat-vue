@@ -33,14 +33,26 @@ function continueRegister(data) {
 	if (registrationSteps[currentStep.value] == "password") {
 		registerData.password = data.password;
 	}
+	if (registrationSteps[currentStep.value] == "page-name") {
+		registerData.name = data.name;
+	}
 
 	++currentStep.value;
+}
+
+function goBack() {
+	if(registrationSteps[currentStep.value] == "password") {
+		currentStep.value -= 2;
+		return;
+	}
+
+	--currentStep.value;
 }
 
 </script>
 
 <template>
-	<div class="flex f-column f-centered">
+	<!-- <div class="flex f-column f-centered"> -->
 		<RegisterFormEmailComponent 
 			v-if="registrationSteps[currentStep] == 'email'" 
 			@continue="continueRegister"
@@ -48,24 +60,28 @@ function continueRegister(data) {
 		<RegisterFormUserNameComponent 
 			v-if="registrationSteps[currentStep] == 'username'" 
 			@continue="continueRegister"
+			@goback="goBack"
 		/>
 		<RegisterFormPasswordComponent
 			v-if="registrationSteps[currentStep] == 'password'" 
 			@continue="continueRegister"
+			@goback="goBack"
 		/>
 		<RegisterFormEmailVerificationComponent
 			v-if="registrationSteps[currentStep] == 'email-verification'" 
 			@continue="continueRegister"
-			
+			@goback="goBack"
+
 			:email="registerData.email"
 		/>
 		<RegisterFormPageNameComponent 
 			v-if="registrationSteps[currentStep] == 'page-name'" 
 			@continue="continueRegister"
+			@goback="goBack"
 		/>
-		<br>
+		<!-- <br>
 		{{ registerData }}
-	</div>
+	</div> -->
 
 	
 </template>
