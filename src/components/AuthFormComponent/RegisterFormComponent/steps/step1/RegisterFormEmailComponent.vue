@@ -106,7 +106,7 @@ async function continueRegister() {
   <section class="register-container flex f-column">
 		<header class="header flex f-column">
 			<h1 class="title">Join Linky Cat</h1>
-			<p class="text">Create your account for free!</p>
+			<p class="text">Create your account for free! 🐈‍⬛</p>
 		</header>
 
 		<p 
@@ -154,6 +154,7 @@ async function continueRegister() {
 			margin-bottom: 15px;
 			font-size: 34pt;
 			font-weight: bold;
+			line-height: 36pt;
 		}
 	}
 
