@@ -13,7 +13,7 @@ const canContinue = ref(false);
 const internalErrorMsg = ref("");
 
 const inputRef = useTemplateRef("input");
-const emit = defineEmits(["continue"]);
+const emit = defineEmits(["continue", "goback"]);
 
 const debouncedValidate = utils.debounce(validate, 700);
 
@@ -132,13 +132,19 @@ async function continueRegister() {
 	emit("continue", "");
 }
 
+function goBack() {
+	emit("goback");
+}
+
 </script>
 
 <template>
   <section class="register-container flex f-column">
-		<header class="header flex f-column">
-			<h1 class="title">Join Linky Cat</h1>
-			<p class="text">Create your account for free!</p>
+		
+		<button class="button-back" @click="goBack">← Back</button>
+		<header class="header flex f-column fade-in-left-to-right">
+			<h1 class="title">Verify your email</h1>
+			<p class="text">We sent a email verification code to <span style="font-weight: 700;">{{ props.email }}</span>.</p>
 		</header>
 
 		<p 
@@ -147,7 +153,7 @@ async function continueRegister() {
 		>
 			{{ internalErrorMsg }}
 		</p>
-    <form class="form flex f-column" @submit.prevent="continueRegister">
+    <form class="form flex f-column fade-in-left-to-right" @submit.prevent="continueRegister">
       <AuthInputComponent 
 				id="verification-code"
         type="text" 
@@ -162,12 +168,10 @@ async function continueRegister() {
         :disabled="!canContinue"
         button-text="Verify" 
       />
-      <p class="text">
-        Already have an account? <RouterLink class="link" to="/login">Log in</RouterLink>
-      </p>
     </form>
   </section>
 </template>
+
 
 <style scoped>
 .text {
@@ -175,17 +179,59 @@ async function continueRegister() {
 	font-weight: lighter;
 }
 
+@keyframes fadeInLeftToRight {
+	0% {
+		opacity: 0;
+		transform: translateX(100px); /* Start off-screen to the left */
+	}
+	100% {
+		opacity: 1;
+		transform: translateX(0); /* End at the original position */
+	}
+}
+
+/* Apply the animation to the element */
+.fade-in-left-to-right {
+	animation: fadeInLeftToRight 0.2s ease-out forwards;
+}
+
 .register-container {
 	width: 90%;
+	max-width: 500px;
+
+	.button-back {
+			width: 90px;
+			padding: 10px;
+			margin-left: -15px;
+
+			margin-bottom: 10px;
+
+			color: var(--button-color);
+
+			font-size: 13pt;
+			font-weight: 500;
+
+			border: none;
+			border-radius: 20px;
+			background-color: inherit;
+
+			cursor: pointer;
+		}
+
+		.button-back:hover {
+			background-color: var(--color-gray-lighter);
+		}
 
 	.header {
 		margin-bottom: 30px;
-		text-align: center;
+		text-align: left;
 
 		.title {
 			margin-bottom: 15px;
 			font-size: 34pt;
 			font-weight: bold;
+
+			line-height: 36pt;
 		}
 	}
 
