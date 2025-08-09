@@ -5,6 +5,8 @@ import AuthInputComponent from "@/components/AuthFormComponent/AuthInputComponen
 import utils from "@/utils/utils";
 import { ref, useTemplateRef } from "vue";
 
+import LOADING_ICON from "@/assets/icons/loading.svg";
+
 const email = ref("");
 const isLoading = ref(false);
 const canContinue = ref(false);
@@ -58,7 +60,6 @@ async function validate() {
 
   // Server validation
   try {
-    isLoading.value = true;
     removeInternalError();
 
 		const body = {
@@ -66,7 +67,6 @@ async function validate() {
 		};
 
     const res = await api.async.post("/api/auth/register/check-email", JSON.stringify(body));
-    isLoading.value = false;
 		
     if (!res.ok) {
       const data = await res.json();
@@ -79,7 +79,6 @@ async function validate() {
       return false;
     }
   } catch {
-    isLoading.value = false;
     showInternalError("A internal error occurred, please try again later");
     return false;
   }
@@ -89,15 +88,20 @@ async function validate() {
 }
 
 async function continueRegister() {
-		
-  if (!canContinue.value)
-		return;
+	isLoading.value = true;
 
-	if (!await validate(email.value))
+  if (!canContinue.value) {
+		isLoading.value = false;
 		return;
+	}
 
+	if (!await validate(email.value)) {
+		isLoading.value = false;
+		return;
+	}
+
+	isLoading.value = false;
 	emit("continue", { email: email.value });
-	
 }
 
 </script>
@@ -115,7 +119,8 @@ async function continueRegister() {
 		>
 			{{ internalErrorMsg }}
 		</p>
-    <form class="form flex f-column" @submit.prevent="continueRegister">
+		<img class="loading-icon" :src="LOADING_ICON" alt="Loading icon" v-if="isLoading">
+    <form class="form flex f-column" @submit.prevent="continueRegister" v-show="!isLoading">
       <AuthInputComponent 
 				id="email"
         type="text" 
@@ -125,15 +130,17 @@ async function continueRegister() {
 
         @input="onInput"
       />
+			
       <AuthInputComponent
         type="button" 
         :disabled="!canContinue"
         button-text="Continue" 
+				
       />
-      <p class="text">
-        Already have an account? <RouterLink class="link" to="/login">Log in</RouterLink>
-      </p>
     </form>
+		<p class="text login-link">
+			Already have an account? <RouterLink class="link" to="/login">Log in</RouterLink>
+		</p>
   </section>
 </template>
 
@@ -143,8 +150,13 @@ async function continueRegister() {
 	font-weight: lighter;
 }
 
+.loading-icon {
+	height: 48px;
+	margin-bottom: 10px;
+}
+
 .register-container {
-	width: 90%;
+	width: 100%;
 
 	.header {
 		margin-bottom: 30px;
@@ -174,13 +186,6 @@ async function continueRegister() {
 
 		text-align: center;
 
-		.text {
-			font-size: 11pt;
-			.link {
-				color: inherit;
-			}
-		}
-
 		.input-error-text {
 			padding-bottom: 2px;
 			padding-left: 2px;
@@ -188,6 +193,15 @@ async function continueRegister() {
 			font-size: 11pt;
 			font-weight: 500;
 			color:var(--error-color);
+		}
+	}
+
+	.login-link {
+		text-align: center;
+		font-size: 11pt;
+		
+		.link {
+			color: inherit;
 		}
 	}
 }

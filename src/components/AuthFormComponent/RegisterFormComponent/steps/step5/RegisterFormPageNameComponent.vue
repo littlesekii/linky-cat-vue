@@ -1,27 +1,17 @@
 
 <script setup>
-import api from "@/api/api";
 import AuthInputComponent from "@/components/AuthFormComponent/AuthInputComponent.vue";
 import utils from "@/utils/utils";
 import { ref, useTemplateRef } from "vue";
 
 const name = ref("");
-const isLoading = ref(false);
 const canContinue = ref(false);
 const internalErrorMsg = ref("");
 
 const inputRef = useTemplateRef("input");
-const emit = defineEmits(["continue", "goback"]);
+const emit = defineEmits(["continue"]);
 
 const debouncedValidate = utils.debounce(validate, 700);
-
-function showInternalError(msg) {
-  internalErrorMsg.value = msg;
-}
-
-function removeInternalError() {
-  internalErrorMsg.value = "";
-}
 
 function onInput(event) {
 	debouncedValidate();
@@ -48,20 +38,13 @@ async function continueRegister() {
 	emit("continue", { name: name.value } );
 }
 
-function goBack() {
-	emit("goback");
-}
-
 </script>
 
 <template>
-  <section class="register-container flex f-column">
-
-		<button class="button-back" @click="goBack">← Back</button>
-
-		<header class="header flex f-column fade-in-left-to-right">
+  <section class="register-container flex f-column fade-in-left-to-right">
+		<header class="header flex f-column">
 			<h1 class="title">Enter your name</h1>
-			<p class="text">This will be shown as title of your page. 🏷️</p>
+			<p class="text">This name will be displayed as your page title. 🏷️</p>
 		</header>
 
 		<p 
@@ -70,7 +53,8 @@ function goBack() {
 		>
 			{{ internalErrorMsg }}
 		</p>
-    <form class="form flex f-column fade-in-left-to-right" @submit.prevent="continueRegister">
+    <img class="loading-icon" :src="LOADING_ICON" alt="Loading icon" v-if="isLoading">
+    <form class="form flex f-column" @submit.prevent="continueRegister" v-show="!isLoading">
       <AuthInputComponent 
 				id="name"
         type="text" 
@@ -91,15 +75,10 @@ function goBack() {
 
 
 <style scoped>
-.text {
-	color: var(--text-light-color);
-	font-weight: lighter;
-}
-
 @keyframes fadeInLeftToRight {
 	0% {
 		opacity: 0;
-		transform: translateX(100px); /* Start off-screen to the left */
+		transform: translateX(10px); /* Start off-screen to the left */
 	}
 	100% {
 		opacity: 1;
@@ -112,32 +91,18 @@ function goBack() {
 	animation: fadeInLeftToRight 0.2s ease-out forwards;
 }
 
+.text {
+	color: var(--text-light-color);
+	font-weight: lighter;
+}
+
+.loading-icon {
+	height: 48px;
+	margin-bottom: 10px;
+}
+
 .register-container {
-	width: 90%;
-	max-width: 500px;
-
-	.button-back {
-			width: 90px;
-			padding: 10px;
-			margin-left: -15px;
-
-			margin-bottom: 10px;
-
-			color: var(--button-color);
-
-			font-size: 13pt;
-			font-weight: 500;
-
-			border: none;
-			border-radius: 20px;
-			background-color: inherit;
-
-			cursor: pointer;
-		}
-
-		.button-back:hover {
-			background-color: var(--color-gray-lighter);
-		}
+	width: 100%;
 
 	.header {
 		margin-bottom: 30px;

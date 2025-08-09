@@ -11,7 +11,7 @@ const internalErrorMsg = ref("");
 
 const inputPasswordRef = useTemplateRef("input-pw");
 const inputPasswordConfirmationRef = useTemplateRef("input-pw-confirmation");
-const emit = defineEmits(["continue", "goback"]);
+const emit = defineEmits(["continue"]);
 
 const debouncedValidate = utils.debounce(validate, 700);
 
@@ -64,10 +64,11 @@ async function validate() {
   return true;  
 }
 
-async function continueRegister() {
-		
-  if (!canContinue.value)
+async function continueRegister() {		
+
+  if (!canContinue.value) {
 		return;
+	}
 
 	if (!await validate())
 		return;
@@ -75,18 +76,12 @@ async function continueRegister() {
 	emit("continue", { password: password.value });
 	
 }
-
-function goBack() {
-	emit("goback");
-}
-
 </script>
 
 <template>
-  <section class="register-container flex f-column">
+  <section class="register-container flex f-column fade-in-left-to-right">
 
-		<button class="button-back" @click="goBack">← Back</button>
-		<header class="header flex f-column fade-in-left-to-right">
+		<header class="header flex f-column">
 			<h1 class="title">Create a password</h1>
 			<p class="text">Ensure it is strong, unique, and not used elsewhere. 🔐</p>
 		</header>
@@ -97,7 +92,8 @@ function goBack() {
 		>
 			{{ internalErrorMsg }}
 		</p>
-    <form class="form flex f-column fade-in-left-to-right" @submit.prevent="continueRegister">
+    <img class="loading-icon" :src="LOADING_ICON" alt="Loading icon" v-if="isLoading">
+    <form class="form flex f-column" @submit.prevent="continueRegister" v-show="!isLoading">
       <AuthInputComponent 
         id="password"
         type="password" 
@@ -127,15 +123,10 @@ function goBack() {
 
 
 <style scoped>
-.text {
-	color: var(--text-light-color);
-	font-weight: lighter;
-}
-
 @keyframes fadeInLeftToRight {
 	0% {
 		opacity: 0;
-		transform: translateX(100px); /* Start off-screen to the left */
+		transform: translateX(10px); /* Start off-screen to the left */
 	}
 	100% {
 		opacity: 1;
@@ -148,32 +139,18 @@ function goBack() {
 	animation: fadeInLeftToRight 0.2s ease-out forwards;
 }
 
+.text {
+	color: var(--text-light-color);
+	font-weight: lighter;
+}
+
+.loading-icon {
+	height: 48px;
+	margin-bottom: 10px;
+}
+
 .register-container {
-	width: 90%;
-	max-width: 500px;
-
-	.button-back {
-			width: 90px;
-			padding: 10px;
-			margin-left: -15px;
-
-			margin-bottom: 10px;
-
-			color: var(--button-color);
-
-			font-size: 13pt;
-			font-weight: 500;
-
-			border: none;
-			border-radius: 20px;
-			background-color: inherit;
-
-			cursor: pointer;
-		}
-
-		.button-back:hover {
-			background-color: var(--color-gray-lighter);
-		}
+	width: 100%;
 
 	.header {
 		margin-bottom: 30px;

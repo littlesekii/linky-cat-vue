@@ -5,6 +5,8 @@ import AuthInputComponent from "@/components/AuthFormComponent/AuthInputComponen
 import utils from "@/utils/utils";
 import { onMounted, ref, useTemplateRef } from "vue";
 
+import LOADING_ICON from "@/assets/icons/loading.svg";
+
 const props = defineProps(["email"]);
 
 const verificationCode = ref("");
@@ -13,13 +15,12 @@ const canContinue = ref(false);
 const internalErrorMsg = ref("");
 
 const inputRef = useTemplateRef("input");
-const emit = defineEmits(["continue", "goback"]);
+const emit = defineEmits(["continue"]);
 
 const debouncedValidate = utils.debounce(validate, 700);
 
 onMounted(async () => {
 	try {
-
 		const body = {
 			"email": props.email
 		};
@@ -31,7 +32,6 @@ onMounted(async () => {
       return false;
     }
   } catch {
-    isLoading.value = false;
     showInternalError("A internal error occurred, please try again later");
     return false;
   }
@@ -88,7 +88,6 @@ function validate() {
 
 async function verifyEmail() {
   try {
-    isLoading.value = true;
     removeInternalError();
 
 		const body = {
@@ -97,7 +96,6 @@ async function verifyEmail() {
 		};
 
     const res = await api.async.post("/api/email-verification/verify", JSON.stringify(body));
-    isLoading.value = false;
 		
     if (!res.ok) {
       const data = await res.json();
@@ -109,8 +107,7 @@ async function verifyEmail() {
       showInternalError("A unexpected error occurred");
       return false;
     }
-  } catch {
-    isLoading.value = false;
+  } catch(e) {
     showInternalError("A internal error occurred, please try again later");
     return false;
   }
@@ -119,30 +116,33 @@ async function verifyEmail() {
 }
 
 async function continueRegister() {
+	isLoading.value = true;
+
+  if (!canContinue.value) {
+		isLoading.value = false;
+		return;
+	}
+
+	if (!validate()) {
+		isLoading.value = false;
+		return;
+	}
+
+	if (!await verifyEmail()) {
+		isLoading.value = false;
+		return;
+	}
 		
-  if (!canContinue.value)
-		return;
-
-	if (!validate())
-		return;
-
-	if (!await verifyEmail())
-		return;
-
+	isLoading.value = false;
 	emit("continue", "");
-}
-
-function goBack() {
-	emit("goback");
 }
 
 </script>
 
 <template>
-  <section class="register-container flex f-column">
+  <section class="register-container flex f-column fade-in-left-to-right">
 		
-		<button class="button-back" @click="goBack">← Back</button>
-		<header class="header flex f-column fade-in-left-to-right">
+		<header class="header flex f-column">
 			<h1 class="title">Verify your email</h1>
 			<p class="text">We sent a email verification code to <span style="font-weight: 700;">{{ props.email }}</span>.</p>
 		</header>
@@ -153,7 +153,8 @@ function goBack() {
 		>
 			{{ internalErrorMsg }}
 		</p>
-    <form class="form flex f-column fade-in-left-to-right" @submit.prevent="continueRegister">
+    <img class="loading-icon" :src="LOADING_ICON" alt="Loading icon" v-if="isLoading">
+    <form class="form flex f-column" @submit.prevent="continueRegister" v-show="!isLoading">
       <AuthInputComponent 
 				id="verification-code"
         type="text" 
@@ -174,15 +175,10 @@ function goBack() {
 
 
 <style scoped>
-.text {
-	color: var(--text-light-color);
-	font-weight: lighter;
-}
-
 @keyframes fadeInLeftToRight {
 	0% {
 		opacity: 0;
-		transform: translateX(100px); /* Start off-screen to the left */
+		transform: translateX(10px); /* Start off-screen to the left */
 	}
 	100% {
 		opacity: 1;
@@ -195,32 +191,21 @@ function goBack() {
 	animation: fadeInLeftToRight 0.2s ease-out forwards;
 }
 
+.text {
+	color: var(--text-light-color);
+	font-weight: lighter;
+}
+
+.loading-icon-container {
+	height: 136px;
+}
+.loading-icon {
+	height: 48px;
+	/* margin-bottom: 10px; */
+}
+
 .register-container {
-	width: 90%;
-	max-width: 500px;
-
-	.button-back {
-			width: 90px;
-			padding: 10px;
-			margin-left: -15px;
-
-			margin-bottom: 10px;
-
-			color: var(--button-color);
-
-			font-size: 13pt;
-			font-weight: 500;
-
-			border: none;
-			border-radius: 20px;
-			background-color: inherit;
-
-			cursor: pointer;
-		}
-
-		.button-back:hover {
-			background-color: var(--color-gray-lighter);
-		}
+	width: 100%;
 
 	.header {
 		margin-bottom: 30px;

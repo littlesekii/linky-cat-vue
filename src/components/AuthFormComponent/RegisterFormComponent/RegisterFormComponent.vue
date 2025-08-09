@@ -52,7 +52,9 @@ function goBack() {
 </script>
 
 <template>
-	<!-- <div class="flex f-column f-centered"> -->
+	<div class="register flex f-column f-centered">
+		<button class="button-back" @click="goBack" v-if="currentStep > 0">← Back</button>
+
 		<RegisterFormEmailComponent 
 			v-if="registrationSteps[currentStep] == 'email'" 
 			@continue="continueRegister"
@@ -60,28 +62,22 @@ function goBack() {
 		<RegisterFormUserNameComponent 
 			v-if="registrationSteps[currentStep] == 'username'" 
 			@continue="continueRegister"
-			@goback="goBack"
 		/>
 		<RegisterFormPasswordComponent
 			v-if="registrationSteps[currentStep] == 'password'" 
 			@continue="continueRegister"
-			@goback="goBack"
 		/>
 		<RegisterFormEmailVerificationComponent
 			v-if="registrationSteps[currentStep] == 'email-verification'" 
 			@continue="continueRegister"
-			@goback="goBack"
 
 			:email="registerData.email"
 		/>
 		<RegisterFormPageNameComponent 
 			v-if="registrationSteps[currentStep] == 'page-name'" 
 			@continue="continueRegister"
-			@goback="goBack"
 		/>
-		<!-- <br>
-		{{ registerData }}
-	</div> -->
+	</div>
 
 	
 </template>
@@ -89,4 +85,33 @@ function goBack() {
 
 <style scoped>
 
+.register {
+	width: 90%;
+	max-width: 500px;
+}
+
+.button-back {
+	align-self: flex-start;
+
+	width: 90px;
+	padding: 10px;
+	margin-left: -15px;
+
+	margin-bottom: 10px;
+
+	color: var(--button-color);
+
+	font-size: 13pt;
+	font-weight: 500;
+
+	border: none;
+	border-radius: 20px;
+	background-color: inherit;
+
+	cursor: pointer;
+}
+
+.button-back:hover {
+	background-color: var(--color-gray-lighter);
+}
 </style>
