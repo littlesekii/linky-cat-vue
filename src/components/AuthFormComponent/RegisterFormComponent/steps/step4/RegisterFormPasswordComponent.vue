@@ -2,12 +2,20 @@
 <script setup>
 import AuthInputComponent from "@/components/AuthFormComponent/AuthInputComponent.vue";
 import utils from "@/utils/utils";
-import { ref, useTemplateRef } from "vue";
+import { reactive, ref, useTemplateRef } from "vue";
 
 const password = ref("");
 const passwordConfirmation = ref("");
 const canContinue = ref(false);
 const internalErrorMsg = ref("");
+
+const conditionMet = reactive({
+	length: false,
+	uppercase: false,
+	lowercase: false,
+	number: false,
+	special: false
+});
 
 const inputPasswordRef = useTemplateRef("input-pw");
 const inputPasswordConfirmationRef = useTemplateRef("input-pw-confirmation");
@@ -15,11 +23,24 @@ const emit = defineEmits(["continue"]);
 
 const debouncedValidate = utils.debounce(validate, 700);
 
+function conditionMetClass(condition) {
+  return (conditionMet[condition] ? "condition-true" : "condition-false");
+}
+
 function onInput(event) {
+  checkCondition();
 	debouncedValidate();
 }
 
-async function validate() {
+function checkCondition () {
+  conditionMet.length = password.value.length >= 8;
+  conditionMet.uppercase = password.value.match("[A-Z]");
+  conditionMet.lowercase = password.value.match("[a-z]");
+  conditionMet.number = password.value.match("[0-9]");
+  conditionMet.special = password.value.match("[!@#$%^&*()_+\\-=\\[\\]{};':\",./<>?]");
+}
+
+function validate() {
 	canContinue.value = false;
 
   // Password validation
@@ -118,6 +139,13 @@ async function continueRegister() {
         button-text="Continue" 
       />
     </form>
+	<ul>
+		<li :class="conditionMetClass('length')">Password must contain at least 8 characters</li>
+		<li :class="conditionMetClass('uppercase')">Password must contain at least one uppercase letter (A-Z)</li>
+		<li :class="conditionMetClass('lowercase')">Password must contain at least one lowercase letter (a-z)</li>
+		<li :class="conditionMetClass('number')">Password must contain at least one number</li>
+		<li :class="conditionMetClass('special')">Password must contain at least one special character (e.g. @, ! or #)</li>
+	</ul>
   </section>
 </template>
 
@@ -142,6 +170,16 @@ async function continueRegister() {
 .text {
 	color: var(--text-light-color);
 	font-weight: lighter;
+}
+
+.condition-true {
+  color: var(--success-color);
+  transition: color 0.4s;
+}
+
+.condition-false {
+  color: var(--error-color);
+  transition: color 0.4s;
 }
 
 .loading-icon {
