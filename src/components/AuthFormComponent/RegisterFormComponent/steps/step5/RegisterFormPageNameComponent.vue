@@ -53,8 +53,7 @@ async function continueRegister() {
 		>
 			{{ internalErrorMsg }}
 		</p>
-    <img class="loading-icon" :src="LOADING_ICON" alt="Loading icon" v-if="isLoading">
-    <form class="form flex f-column" @submit.prevent="continueRegister" v-show="!isLoading">
+    <form class="form flex f-column" @submit.prevent="continueRegister">
       <AuthInputComponent 
 				id="name"
         type="text" 
@@ -105,7 +104,7 @@ async function continueRegister() {
 	width: 100%;
 
 	.header {
-		margin-bottom: 30px;
+		margin-bottom: 20px;
 		text-align: left;
 
 		.title {

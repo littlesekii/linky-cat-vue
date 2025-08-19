@@ -159,7 +159,7 @@ async function continueRegister() {
 	width: 100%;
 
 	.header {
-		margin-bottom: 30px;
+		margin-bottom: 20px;
 		text-align: center;
 
 		.title {

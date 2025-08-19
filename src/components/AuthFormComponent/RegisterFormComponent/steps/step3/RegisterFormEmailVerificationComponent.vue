@@ -107,7 +107,7 @@ async function verifyEmail() {
       showInternalError("A unexpected error occurred");
       return false;
     }
-  } catch(e) {
+  } catch {
     showInternalError("A internal error occurred, please try again later");
     return false;
   }
@@ -208,7 +208,7 @@ async function continueRegister() {
 	width: 100%;
 
 	.header {
-		margin-bottom: 30px;
+		margin-bottom: 20px;
 		text-align: left;
 
 		.title {

@@ -4,6 +4,8 @@ import AuthInputComponent from "@/components/AuthFormComponent/AuthInputComponen
 import utils from "@/utils/utils";
 import { reactive, ref, useTemplateRef } from "vue";
 
+import CheckSVG from "@/assets/icons/CheckSVG.vue";
+
 const password = ref("");
 const passwordConfirmation = ref("");
 const canContinue = ref(false);
@@ -11,8 +13,7 @@ const internalErrorMsg = ref("");
 
 const conditionMet = reactive({
 	length: false,
-	uppercase: false,
-	lowercase: false,
+	upperlowercase: false,
 	number: false,
 	special: false
 });
@@ -21,21 +22,23 @@ const inputPasswordRef = useTemplateRef("input-pw");
 const inputPasswordConfirmationRef = useTemplateRef("input-pw-confirmation");
 const emit = defineEmits(["continue"]);
 
-const debouncedValidate = utils.debounce(validate, 700);
+const debouncedValidate = utils.debounce(validate, 1000);
 
 function conditionMetClass(condition) {
-  return (conditionMet[condition] ? "condition-true" : "condition-false");
+  return (conditionMet[condition] ? "condition-met" : "");
 }
 
 function onInput(event) {
+	inputPasswordRef.value.removeError();
+	inputPasswordConfirmationRef.value.removeError();
+
   checkCondition();
 	debouncedValidate();
 }
 
 function checkCondition () {
   conditionMet.length = password.value.length >= 8;
-  conditionMet.uppercase = password.value.match("[A-Z]");
-  conditionMet.lowercase = password.value.match("[a-z]");
+  conditionMet.upperlowercase = password.value.match("[A-Z]") && password.value.match("[a-z]");
   conditionMet.number = password.value.match("[0-9]");
   conditionMet.special = password.value.match("[!@#$%^&*()_+\\-=\\[\\]{};':\",./<>?]");
 }
@@ -113,8 +116,7 @@ async function continueRegister() {
 		>
 			{{ internalErrorMsg }}
 		</p>
-    <img class="loading-icon" :src="LOADING_ICON" alt="Loading icon" v-if="isLoading">
-    <form class="form flex f-column" @submit.prevent="continueRegister" v-show="!isLoading">
+    <form class="form flex f-column" @submit.prevent="continueRegister">
       <AuthInputComponent 
         id="password"
         type="password" 
@@ -133,19 +135,52 @@ async function continueRegister() {
 
         @input="onInput"
       />
+
+			<ul class="conditions flex">
+				<li class="text condition flex" :class="conditionMetClass('length')">
+					<span class="condition-icon" v-if="conditionMet['length']">
+						<CheckSVG size="16"/>
+					</span>
+					<span class="condition-icon" v-else>
+						•
+					</span>
+					Min 8 characters
+				</li>
+				<li class="text condition flex" :class="conditionMetClass('upperlowercase')">
+					<span class="condition-icon" v-if="conditionMet['upperlowercase']">
+						<CheckSVG size="16"/>
+					</span>
+					<span class="condition-icon" v-else>
+						•
+					</span>
+					Upper and lowercase letters
+				</li>		
+				<li class="text condition flex" :class="conditionMetClass('number')">
+					<span class="condition-icon" v-if="conditionMet['number']">
+						<CheckSVG size="16"/>
+					</span>
+					<span class="condition-icon" v-else>
+						•
+					</span>
+					A number
+				</li>
+				<li class="text condition flex" :class="conditionMetClass('special')">
+					<span class="condition-icon" v-if="conditionMet['special']">
+						<CheckSVG size="16"/>
+					</span>
+					<span class="condition-icon" v-else>
+						•
+					</span>
+					A symbol (e.g. @, ! or #)
+				</li>
+			</ul>
+
       <AuthInputComponent
         type="button" 
         :disabled="!canContinue"
         button-text="Continue" 
       />
     </form>
-	<ul>
-		<li :class="conditionMetClass('length')">Password must contain at least 8 characters</li>
-		<li :class="conditionMetClass('uppercase')">Password must contain at least one uppercase letter (A-Z)</li>
-		<li :class="conditionMetClass('lowercase')">Password must contain at least one lowercase letter (a-z)</li>
-		<li :class="conditionMetClass('number')">Password must contain at least one number</li>
-		<li :class="conditionMetClass('special')">Password must contain at least one special character (e.g. @, ! or #)</li>
-	</ul>
   </section>
 </template>
 
@@ -172,16 +207,6 @@ async function continueRegister() {
 	font-weight: lighter;
 }
 
-.condition-true {
-  color: var(--success-color);
-  transition: color 0.4s;
-}
-
-.condition-false {
-  color: var(--error-color);
-  transition: color 0.4s;
-}
-
 .loading-icon {
 	height: 48px;
 	margin-bottom: 10px;
@@ -191,7 +216,7 @@ async function continueRegister() {
 	width: 100%;
 
 	.header {
-		margin-bottom: 30px;
+		margin-bottom: 20px;
 		text-align: left;
 
 		.title {
@@ -234,6 +259,44 @@ async function continueRegister() {
 			font-weight: 500;
 			color:var(--error-color);
 		}
+
+		.conditions {
+			list-style: none;
+			flex-wrap: wrap;
+			margin-bottom: 10px;
+
+			.condition {		
+				width: 50%;
+				padding: 3px;
+				transition: color 0.2s;
+				align-items: center;
+
+				.condition-icon {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+
+					min-width: 16px; 
+					text-align: center;
+					margin-right: 3px;
+				}
+			}
+
+			.condition-met {
+				color: var(--success-color);
+			}
+		}
+
+		@media (max-width: 510px) {
+			.conditions {
+				flex-direction: column;
+
+				.condition {
+					width: 100%;
+					/* margin-left: 8px; */
+				}
+			}
+		} 
 	}
 }
 
