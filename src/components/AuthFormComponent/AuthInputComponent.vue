@@ -30,10 +30,10 @@ function updateModelValue(event) {
 }
 
 function validate() {
-
+  removeError();
   const errorMsg = "Please fill out this field";
 
-  if (props.modelValue === "") {
+  if (props.modelValue.trim() === "") {
     showError(errorMsg);
     return false;
   }
@@ -55,7 +55,8 @@ function removeError() {
 
 defineExpose({
   validate,
-  showError
+  showError,
+  removeError
 });
 
 </script>
