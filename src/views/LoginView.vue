@@ -4,7 +4,7 @@ import router from "@/router";
 
 function login(data) {
   console.log(data);
-  router.replace("/");
+  router.replace("/dashboard");
 }
 
 </script>
