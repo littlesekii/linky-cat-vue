@@ -104,10 +104,12 @@ async function continueRegister() {
 	emit("continue", { email: email.value });
 }
 
+defineExpose({isLoading});
+
 </script>
 
 <template>
-  <section class="register-container flex f-column">
+  <section class="register-container flex f-column" v-show="!isLoading">
 		<header class="header flex f-column">
 			<h1 class="title">Join Linky Cat</h1>
 			<p class="text">Create your account for free! 🐈‍⬛</p>
@@ -119,8 +121,7 @@ async function continueRegister() {
 		>
 			{{ internalErrorMsg }}
 		</p>
-		<img class="loading-icon" :src="LOADING_ICON" alt="Loading icon" v-if="isLoading">
-    <form class="form flex f-column" @submit.prevent="continueRegister" v-show="!isLoading">
+    <form class="form flex f-column" @submit.prevent="continueRegister">
       <AuthInputComponent 
 				id="email"
         type="text" 
@@ -148,11 +149,6 @@ async function continueRegister() {
 .text {
 	color: var(--text-light-color);
 	font-weight: lighter;
-}
-
-.loading-icon {
-	height: 48px;
-	margin-bottom: 10px;
 }
 
 .register-container {

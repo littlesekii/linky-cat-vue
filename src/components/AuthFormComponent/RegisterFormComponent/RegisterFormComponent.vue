@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from "vue";
+import { computed, onUpdated, reactive, ref, useTemplateRef } from "vue";
 import RegisterFormEmailComponent from "./steps/step1/RegisterFormEmailComponent.vue";
 import RegisterFormUserNameComponent from "./steps/step2/RegisterFormUserNameComponent.vue";
 import RegisterFormEmailVerificationComponent from "./steps/step3/RegisterFormEmailVerificationComponent.vue";
@@ -7,7 +7,20 @@ import RegisterFormPasswordComponent from "./steps/step4/RegisterFormPasswordCom
 import RegisterFormPageNameComponent from "./steps/step5/RegisterFormPageNameComponent.vue";
 import api from "@/api/api";
 
-const isLoading = ref(false);
+import LOADING_ICON from "@/assets/icons/loading.svg";
+
+const stepComponentRef = [
+	useTemplateRef("email"),
+	useTemplateRef("username"),
+	useTemplateRef("email-verification")
+];
+
+const isLoading = computed(() => {
+	return (stepComponentRef[0].value ? stepComponentRef[0].value.isLoading : false)
+		|| (stepComponentRef[1].value ? stepComponentRef[1].value.isLoading : false) 
+		|| (stepComponentRef[2].value ? stepComponentRef[2].value.isLoading : false)
+		|| registrationSteps[currentStep.value] == "final";
+});
 
 const emit = defineEmits(["register"]);
 
@@ -40,10 +53,7 @@ async function register() {
   };
 
   try {
-		isLoading.value = true;
-
     const res = await api.async.post("/api/auth/register", JSON.stringify(body));
-		isLoading.value = false;
 
     if (!res.ok) {
 			const data = await res.json();
@@ -64,7 +74,6 @@ async function register() {
 		emit("register");
 
   } catch {
-		isLoading.value = false;
 		alert("A internal error occurred, please try again later");
   }
 
@@ -103,15 +112,18 @@ function goBack() {
 
 <template>
 	<div class="register flex f-column f-centered">
-		<button class="button-back" @click="goBack" v-if="currentStep > 0">← Back</button>
+		<img class="loading-icon" :src="LOADING_ICON" alt="Loading icon" v-if="isLoading">
+		<button class="button-back" @click="goBack" v-if="currentStep > 0 && !isLoading">← Back</button>
 
 		<RegisterFormEmailComponent 
 			v-if="registrationSteps[currentStep] == 'email'" 
 			@continue="continueRegister"
+			ref="email"
 		/>
 		<RegisterFormUserNameComponent 
 			v-if="registrationSteps[currentStep] == 'username'" 
 			@continue="continueRegister"
+			ref="username"
 		/>
 		<RegisterFormPasswordComponent
 			v-if="registrationSteps[currentStep] == 'password'" 
@@ -120,6 +132,7 @@ function goBack() {
 		<RegisterFormEmailVerificationComponent
 			v-if="registrationSteps[currentStep] == 'email-verification'" 
 			@continue="continueRegister"
+			ref="email-verification"
 
 			:email="registerData.email"
 		/>
@@ -134,6 +147,10 @@ function goBack() {
 
 
 <style scoped>
+
+.loading-icon {
+	height: 80px;
+}
 
 .register {
 	width: 90%;

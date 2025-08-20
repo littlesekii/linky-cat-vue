@@ -95,11 +95,6 @@ async function continueRegister() {
 	font-weight: lighter;
 }
 
-.loading-icon {
-	height: 48px;
-	margin-bottom: 10px;
-}
-
 .register-container {
 	width: 100%;
 

@@ -137,11 +137,12 @@ async function continueRegister() {
 	emit("continue", "");
 }
 
+defineExpose({isLoading});
+
 </script>
 
 <template>
-  <section class="register-container flex f-column fade-in-left-to-right">
-		
+  <section class="register-container flex f-column fade-in-left-to-right" v-show="!isLoading">	
 		<header class="header flex f-column">
 			<h1 class="title">Verify your email</h1>
 			<p class="text">We sent a email verification code to <span style="font-weight: 700;">{{ props.email }}</span>.</p>
@@ -153,8 +154,8 @@ async function continueRegister() {
 		>
 			{{ internalErrorMsg }}
 		</p>
-    <img class="loading-icon" :src="LOADING_ICON" alt="Loading icon" v-if="isLoading">
-    <form class="form flex f-column" @submit.prevent="continueRegister" v-show="!isLoading">
+    
+    <form class="form flex f-column" @submit.prevent="continueRegister">
       <AuthInputComponent 
 				id="verification-code"
         type="text" 
@@ -198,10 +199,6 @@ async function continueRegister() {
 
 .loading-icon-container {
 	height: 136px;
-}
-.loading-icon {
-	height: 48px;
-	/* margin-bottom: 10px; */
 }
 
 .register-container {
