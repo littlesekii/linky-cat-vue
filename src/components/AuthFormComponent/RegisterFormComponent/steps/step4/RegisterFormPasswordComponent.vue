@@ -22,13 +22,14 @@ const inputPasswordRef = useTemplateRef("input-pw");
 const inputPasswordConfirmationRef = useTemplateRef("input-pw-confirmation");
 const emit = defineEmits(["continue"]);
 
-const debouncedValidate = utils.debounce(validate, 1000);
+const debouncedValidate = utils.debounce(validate, 1200);
 
 function conditionMetClass(condition) {
   return (conditionMet[condition] ? "condition-met" : "");
 }
 
 function onInput(event) {
+	canContinue.value = false;
 	inputPasswordRef.value.removeError();
 	inputPasswordConfirmationRef.value.removeError();
 

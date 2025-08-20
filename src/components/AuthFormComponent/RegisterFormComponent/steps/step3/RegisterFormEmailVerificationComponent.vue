@@ -47,6 +47,7 @@ function removeInternalError() {
 }
 
 function onInput(event) {
+	canContinue.value = false;
 	formatInput(event.target);
 	debouncedValidate();
 }

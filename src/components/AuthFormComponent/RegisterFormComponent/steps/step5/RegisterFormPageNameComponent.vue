@@ -14,6 +14,7 @@ const emit = defineEmits(["continue"]);
 const debouncedValidate = utils.debounce(validate, 700);
 
 function onInput(event) {
+	canContinue.value = false;
 	debouncedValidate();
 }
 

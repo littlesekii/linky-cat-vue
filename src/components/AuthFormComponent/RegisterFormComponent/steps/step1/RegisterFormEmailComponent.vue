@@ -26,6 +26,7 @@ function removeInternalError() {
 }
 
 function onInput(event) {
+	canContinue.value = false;
 	debouncedValidate();
 }
 
