@@ -1,12 +1,19 @@
 <script setup>
 import RegisterFormComponent from "@/components/AuthFormComponent/RegisterFormComponent/RegisterFormComponent.vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+function register() {
+  router.push("/login");
+}
 
 </script>
 
 <template>
   <main class="main-container flex">
     <div class="left-container flex f-centered">
-      <RegisterFormComponent/>
+      <RegisterFormComponent @register="register"/>
     </div>
     <aside class="right-container">
       

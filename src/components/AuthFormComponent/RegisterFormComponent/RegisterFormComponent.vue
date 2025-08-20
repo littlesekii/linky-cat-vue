@@ -5,6 +5,11 @@ import RegisterFormUserNameComponent from "./steps/step2/RegisterFormUserNameCom
 import RegisterFormEmailVerificationComponent from "./steps/step3/RegisterFormEmailVerificationComponent.vue";
 import RegisterFormPasswordComponent from "./steps/step4/RegisterFormPasswordComponent.vue";
 import RegisterFormPageNameComponent from "./steps/step5/RegisterFormPageNameComponent.vue";
+import api from "@/api/api";
+
+const isLoading = ref(false);
+
+const emit = defineEmits(["register"]);
 
 const registerData = reactive({
 	username: "",
@@ -19,9 +24,51 @@ const registrationSteps = [
 	"email", 
 	"username", 
 	"email-verification",
-	"password", 
-	"page-name"
+	"password",  
+	"page-name",
+	"final"
 ];
+
+async function register() {
+	
+  const body = {
+    "username": registerData.username,
+		"email": registerData.email,
+    "password": registerData.password,
+		"firstName": registerData.firstName,
+		"lastName": ""
+  };
+
+  try {
+		isLoading.value = true;
+
+    const res = await api.async.post("/api/auth/register", JSON.stringify(body));
+		isLoading.value = false;
+
+    if (!res.ok) {
+			const data = await res.json();
+			if (data.errorCode === "AUTH003") {
+				alert(data.error);
+				return;
+			}
+
+			if (data.errorCode === "VAL001") {
+				alert(data.error);
+				return;
+			}
+			
+			alert("A unexpected error occurred");
+			return;
+    }
+
+		emit("register");
+
+  } catch {
+		isLoading.value = false;
+		alert("A internal error occurred, please try again later");
+  }
+
+}
 
 function continueRegister(data) {
 	if (registrationSteps[currentStep.value] == "email") {
@@ -34,10 +81,13 @@ function continueRegister(data) {
 		registerData.password = data.password;
 	}
 	if (registrationSteps[currentStep.value] == "page-name") {
-		registerData.name = data.name;
+		registerData.firstName = data.name;
 	}
-
+	
 	++currentStep.value;
+	if (registrationSteps[currentStep.value] == "final") {
+		register();
+	}
 }
 
 function goBack() {
